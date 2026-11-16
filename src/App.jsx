@@ -46,7 +46,7 @@ function App() {
     <AppShell user={session.user} onLogout={handleLogout} onCheckProfile={handleCheckProfile}>
       {message && <p className="notice" role="status">{message}</p>}
       <ProtectedView session={session} allowedRoles={['admin', 'learner']}>
-        {session.user.role === 'admin' && <AdminDashboard user={session.user} />}
+        {session.user.role === 'admin' && <AdminDashboard user={session.user} token={session.token} onUnauthorized={handleLogout} />}
         {session.user.role === 'learner' && <LearnerDashboard user={session.user} />}
       </ProtectedView>
     </AppShell>

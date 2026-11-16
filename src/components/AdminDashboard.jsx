@@ -1,17 +1,26 @@
+import { useState } from 'react'
 import InfoCard from './InfoCard'
+import UserManagement from './UserManagement'
+import CourseManagement from './CourseManagement'
 
-const cards = [
-  { id: 'users', title: 'Users', detail: 'User management comes on Day 3.' },
-  { id: 'courses', title: 'Courses', detail: 'Course management comes on Day 4.' },
-  { id: 'activity', title: 'Activity', detail: 'This is a static example card.' },
-]
+function AdminDashboard({ user, token, onUnauthorized }) {
+  const [view, setView] = useState('home')
 
-function AdminDashboard({ user }) {
   return <section>
     <p className="eyebrow">Admin dashboard</p>
     <h1>Hello, {user.name}</h1>
-    <p className="intro">A simple overview. These cards use mock data.</p>
-    <div className="card-grid">{cards.map((card) => <InfoCard key={card.id} title={card.title} detail={card.detail} />)}</div>
+    <nav className="view-menu" aria-label="Admin pages">
+      <button type="button" className={view === 'home' ? '' : 'secondary'} onClick={() => setView('home')}>Home</button>
+      <button type="button" className={view === 'users' ? '' : 'secondary'} onClick={() => setView('users')}>Users</button>
+      <button type="button" className={view === 'courses' ? '' : 'secondary'} onClick={() => setView('courses')}>Courses</button>
+    </nav>
+    {view === 'home' && <div className="card-grid">
+      <InfoCard title="Users" detail="Open Users to register a learner." />
+      <InfoCard title="Courses" detail="Open Courses to manage real course data." />
+    </div>}
+    {view === 'users' && <UserManagement />}
+    {view === 'courses' && <CourseManagement token={token} onUnauthorized={onUnauthorized} />}
   </section>
 }
+
 export default AdminDashboard

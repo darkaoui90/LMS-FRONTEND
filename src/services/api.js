@@ -62,3 +62,10 @@ export async function changeCourseStatus(token, courseId, action) {
   })
   return readResponse(response)
 }
+
+export async function getMyEnrollments(token) {
+  const response = await fetch(API_URL + '/api/enrollments/me', {
+    headers: { Authorization: 'Bearer ' + token },
+  })
+  return readResponse(response)
+}

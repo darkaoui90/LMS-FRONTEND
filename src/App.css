@@ -107,6 +107,14 @@ label { display: block; color: #344f5e; font-weight: 700; font-size: .88rem; }
 .status-badge { display: inline-block; border-radius: 30px; padding: 5px 10px; background: #f4ecda; color: #8b652a; font-size: .7rem; font-weight: 800; text-transform: capitalize; }
 .status-badge.published { background: #dff4e9; color: #207455; }
 .status-badge.archived { background: #e9edf0; color: #60717d; }
+.status-badge.active { background: #dff4e9; color: #207455; }
+.status-badge.completed { background: #e0eefb; color: #28669b; }
+.status-badge.dropped { background: #e9edf0; color: #60717d; }
+.enrollment-card { background: white; border: 1px solid #e0e9ed; border-radius: 13px; padding: 22px; box-shadow: 0 4px 14px #12344906; overflow-wrap: anywhere; }
+.enrollment-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.enrollment-card h3 { font-size: 1.1rem; }
+.enrollment-card > p { min-height: 48px; color: #687e8a; }
+.enrollment-footer { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; border-top: 1px solid #edf1f3; padding-top: 14px; color: #758994; font-size: .78rem; }
 .detail-panel { min-width: 0; align-self: start; background: white; border: 1px solid #e0e9ed; border-radius: 13px; padding: 27px; overflow-wrap: anywhere; }
 .detail-panel h2 { margin: 14px 0; }
 .course-description { color: #637a88; }

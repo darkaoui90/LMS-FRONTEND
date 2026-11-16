@@ -42,7 +42,9 @@ function CourseForm({ course, onSave, onCancel }) {
   }
 
   return <form className="editor-form" onSubmit={handleSubmit}>
-    <h3>{course ? 'Edit course' : 'Create course'}</h3>
+    <p className="eyebrow">COURSE EDITOR</p>
+    <h2>{course ? 'Edit course' : 'Create course'}</h2>
+    <p className="muted">Add the details learners will see in the catalog.</p>
     <label htmlFor="course-title">Title</label>
     <input id="course-title" value={title} onChange={(event) => setTitle(event.target.value)} required />
     <label htmlFor="course-description">Description</label>

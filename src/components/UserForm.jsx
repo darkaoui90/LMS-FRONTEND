@@ -37,7 +37,9 @@ function UserForm({ onSubmit }) {
   }
 
   return <form className="editor-form" onSubmit={handleSubmit}>
-    <h3>Add a learner</h3>
+    <p className="eyebrow">NEW ACCOUNT</p>
+    <h2>Add a learner</h2>
+    <p className="muted">Fill in these three fields to create a learner account.</p>
     <label htmlFor="new-name">Name</label>
     <input id="new-name" value={name} onChange={(event) => setName(event.target.value)} required />
     <label htmlFor="new-email">Email</label>

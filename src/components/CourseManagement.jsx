@@ -79,46 +79,52 @@ function CourseManagement({ token, onUnauthorized }) {
 
   return <section>
     <div className="section-heading">
-      <h2>Courses</h2>
+      <div><p className="eyebrow">CATALOG</p><h1>Courses</h1><p className="page-subtitle">Organize the learning content in your platform.</p></div>
       <div className="button-row">
-        <button type="button" onClick={loadCourses} disabled={loading}>{loading ? 'Loading...' : 'Load courses'}</button>
-        <button type="button" className="secondary" onClick={() => setEditing('new')}>New course</button>
+        <button type="button" className="outline-button" onClick={loadCourses} disabled={loading}>{loading ? 'Loading...' : 'Load courses'}</button>
+        <button type="button" onClick={() => setEditing('new')}>+ New course</button>
       </div>
     </div>
     {error && <p className="error" role="alert">{error}</p>}
     {message && <p className="notice" role="status">{message}</p>}
-    {loading && <p>Loading courses...</p>}
+    {loading && <p className="loading-state">Loading courses...</p>}
     {loaded && <>
-      <div className="filter-row">
-        <label htmlFor="category-filter">Filter category</label>
-        <input id="category-filter" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} placeholder="Type a category" />
-        <label htmlFor="status-filter">Filter status</label>
-        <select id="status-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-          <option value="all">All</option>
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-          <option value="archived">Archived</option>
-        </select>
+      <div className="filter-panel">
+        <strong>{visibleCourses.length} of {courses.length} courses</strong>
+        <div className="filter-row">
+          <label htmlFor="category-filter">Category</label>
+          <input id="category-filter" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} placeholder="Search category" />
+          <label htmlFor="status-filter">Status</label>
+          <select id="status-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+            <option value="all">All statuses</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
       </div>
       <div className="management-grid">
         <CourseList courses={visibleCourses} selectedId={selectedId} onSelect={setSelectedId} />
         <div className="detail-panel">
           {selectedCourse ? <>
-            <h3>{selectedCourse.title}</h3>
-            <p>{selectedCourse.description}</p>
-            <p>Category: {selectedCourse.category}</p>
-            <p>Level: {selectedCourse.level}</p>
-            <p>Status: {selectedCourse.status}</p>
-            <p>Trainer ID: {selectedCourse.trainer || 'Not available'}</p>
-            <p>Duration: {selectedCourse.estimatedDuration} minutes</p>
+            <p className="eyebrow">COURSE DETAILS</p>
+            <span className={'status-badge ' + selectedCourse.status}>{selectedCourse.status}</span>
+            <h2>{selectedCourse.title}</h2>
+            <p className="course-description">{selectedCourse.description}</p>
+            <div className="detail-facts">
+              <p><span>Category</span><strong>{selectedCourse.category}</strong></p>
+              <p><span>Level</span><strong>{selectedCourse.level}</strong></p>
+              <p><span>Duration</span><strong>{selectedCourse.estimatedDuration} minutes</strong></p>
+              <p><span>Trainer ID</span><strong>{selectedCourse.trainer || 'Not available'}</strong></p>
+            </div>
             <h4>Objectives</h4>
             <p>{selectedCourse.objectives.join(', ')}</p>
             <div className="button-row">
               <button type="button" onClick={() => setEditing(selectedCourse._id)}>Edit</button>
-              {selectedCourse.status === 'published' && <button type="button" className="secondary" onClick={() => handleStatus('unpublish')}>Unpublish</button>}
-              {selectedCourse.status !== 'archived' && <button type="button" className="secondary" onClick={() => handleStatus('archived')}>Archive</button>}
+              {selectedCourse.status === 'published' && <button type="button" className="outline-button" onClick={() => handleStatus('unpublish')}>Unpublish</button>}
+              {selectedCourse.status !== 'archived' && <button type="button" className="outline-button" onClick={() => handleStatus('archived')}>Archive</button>}
             </div>
-          </> : <p>Select a course to see its details.</p>}
+          </> : <div className="empty-detail"><span className="empty-icon">C</span><h3>Choose a course</h3><p>Select a course on the left to view its details and actions.</p></div>}
         </div>
       </div>
     </>}

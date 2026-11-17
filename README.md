@@ -1,83 +1,101 @@
-# EduLearn LMS Frontend — Sprint 3, Days 1 and 2
+# EduLearn LMS Frontend - Sprint 3
 
-Small React learning project using JavaScript, JSX, CSS, `useState`, and `fetch`. Dashboard cards are examples, not database records.
+This is a small React learning project. It uses JavaScript, JSX, CSS, `useState`, and native `fetch`. API calls happen after a form submit or button click; there is no `useEffect`, router, or state library.
 
-## Run
+## Start the project
 
-Start the Sprint 2 backend on port 3000 and its MongoDB. In `LMS-Frontend`, run `npm install`, then `npm run dev`. Open `http://localhost:5173`. Run `npm run build` to check the build.
+1. Start MongoDB and the existing LMS backend. Locally, MongoDB is mapped to port 27018 and the backend uses port 3000.
+2. In `LMS-Frontend`, run `npm install`.
+3. Run `npm run dev -- --port 5173 --strictPort`.
+4. Open `http://localhost:5173`.
+5. Run `npm run build` and `npm run lint` to check the project.
 
-The API base URL defaults to `http://localhost:3000`. To change it, set `VITE_API_URL=http://localhost:YOUR_PORT` in a frontend `.env.local`. Never put a password or JWT in that file. The backend now allows the Vite origin `http://localhost:5173` through CORS.
+The API base URL is `http://localhost:3000` by default. To use another backend, set `VITE_API_URL` in a local `.env.local` file. Do not put passwords or tokens in that file. The backend CORS setting allows `http://localhost:5173`.
 
-## Backend contract checked in source
+## Real backend contract
 
-Express mounts its routes under `/api`.
+The backend mounts these routes under `/api`. These paths and response fields were checked in the backend source.
 
-| Route | Purpose | Used now? |
+| Route | What it does | Frontend use |
 | --- | --- | --- |
-| `POST /api/auth/login` | Login | Yes |
-| `GET /api/profiles/me` | Protected profile | Yes, Check profile button |
-| `POST /api/auth/register` | Create learner | No |
-| `GET /api/enrollments/me` | Learner enrollments | Day 5 |
-| `GET /api/courses` | Public courses | Day 4 |
-| `GET /api/admin/config` | Admin-only config | No |
+| `POST /api/auth/login` | Returns top-level `token` and `data.user` | Sign in |
+| `GET /api/profiles/me` | Returns the signed-in user's profile | Check profile button |
+| `POST /api/auth/register` | Public learner registration | Admin Users page form |
+| `GET /api/trainer/Courses` | Lists every course for Admin, including drafts | Admin Courses page |
+| `POST /api/courses` | Creates a draft course | Admin Courses page |
+| `PATCH /api/courses/:id` | Updates a course | Admin Courses page |
+| `PATCH /api/courses/:id/unpublish` | Changes a published course to draft | Admin Courses page |
+| `PATCH /api/courses/:id/archived` | Archives a course | Admin Courses page |
+| `GET /api/enrollments/me` | Returns only the signed-in Learner's enrollments | Learner My courses |
 
-Login sends JSON with `email` and `password`. A successful response contains `success`, `message`, a top-level `token`, and `data.user` with `id`, `name`, `email`, and `role`. The role always comes from the server. Protected requests send `Authorization: Bearer <token>`. Profile returns `data.user`.
+Login sends JSON with `email` and `password`. Its user object contains `id`, `name`, `email`, and `role`. The role comes from the server, never from a role picker. Protected requests use `Authorization: Bearer <token>`.
 
-Errors use `{"success":false,"message":"..."}`. Missing or expired bearer tokens return **401**. Forbidden roles return **403**. Wrong login credentials currently return **400**, so the form handles 400 as well as 401. A profile 401 clears the session; a 403 keeps it and shows an error. No backend logout route exists, so logout clears React state. Refreshing also clears the token because it is never stored in localStorage.
+`GET /api/enrollments/me` returns `data.enrollments`. Each item has `_id`, enrollment `status`, and a populated `course` with `title`, `description`, and course `status`. It uses the JWT identity; the frontend does not send a learner ID. If a course was deleted, its populated value can be null and the card says it is unavailable.
 
-The PDF gives example profile and enrollment paths that differ from this backend. The real paths are listed above. The backend currently accepts suspended users at login but refuses their protected requests. This project does not change that business logic.
+Backend errors use `{"success":false,"message":"..."}`. A missing or expired token gives 401. A forbidden role gives 403. Wrong login credentials currently give 400. A protected-request 401 clears the React session. A 403 shows "Access denied" and keeps the session.
 
-## Components and React concepts
+## What each screen does
 
-```text
-App (token, user, message in state)
-├─ LoginForm (controlled inputs, onLogin callback)
-└─ AppShell (user, onLogout, onCheckProfile)
-   └─ ProtectedView (session, allowedRoles)
-      ├─ AdminDashboard → InfoCard examples
-      └─ LearnerDashboard → InfoCard examples
-```
+- **Login:** controlled email and password fields. The token and user stay only in React memory. Refresh or logout clears them.
+- **Admin Home:** simple navigation to Users and Courses.
+- **Admin Users:** creates a learner through the real registration route. Duplicate email shows 409. The backend has **no route** to list, edit, activate, or suspend users, so this screen does not invent user data or filters. Registration itself is public on the backend.
+- **Admin Courses:** loads real courses on a button click, filters by category and status, selects a course, creates or edits it, and confirms archive/unpublish actions. New courses start as drafts. The list returns trainer IDs rather than trainer names.
+- **Learner My courses:** loads real enrollments on a button click. It shows loading, empty, error, and course-card states. No other learner's ID is selectable.
 
-Props send data from parent to child. Callbacks send user actions back to App. `useState` remembers the inputs and session. `map` renders the example cards with stable keys. API calls run only after submit or button click.
+The PDF's example enrollment path differs from this backend. The real path is `/api/enrollments/me`. The backend also accepts suspended users at login, but protected requests reject them; this frontend does not change that backend behavior.
 
-## Simple wireframes
-
-Desktop:
+## Component map
 
 ```text
-┌────────────────────────────────────────────────────┐
-│ EduLearn LMS         User · role   Profile   Logout │
-├────────────────────────────────────────────────────┤
-│ Dashboard heading                                  │
-│ [ Example card ] [ Example card ] [ Example card ] │
-└────────────────────────────────────────────────────┘
+App (session and message)
+|- LoginForm
+|- AppShell (profile button and logout)
+|  |- ProtectedView
+|     |- AdminDashboard
+|     |  |- UserManagement -> UserForm
+|     |  |- CourseManagement -> CourseList -> CourseCard
+|     |  |                    -> CourseForm
+|     |- LearnerDashboard -> EnrollmentCard
 ```
 
-Mobile:
+Props pass data down to child components. Callbacks pass clicks and form submissions back to a parent. `useState` remembers the session, form values, filters, and loaded data. `.map()` draws a card for each item with a stable `_id` key. `.filter()` calculates visible courses without copying filtered data into another state variable.
+
+## Layout sketches
 
 ```text
-┌─────────────────────┐
-│ EduLearn LMS        │
-│ User · role         │
-│ Profile    Logout   │
-├─────────────────────┤
-│ Dashboard heading   │
-│ [ Example card ]    │
-│ [ Example card ]    │
-└─────────────────────┘
+Desktop: [EduLearn header / profile / logout]
+         [Admin menu] [Welcome or Users or Course list + details]
+         [Learner welcome] [My course cards in two columns]
+
+Mobile:  [EduLearn header]
+         [Profile / logout]
+         [Menu or welcome]
+         [Cards and forms stacked in one column]
 ```
 
-## Manual test plan
+## Checks already executed
 
-Try an empty form, wrong credentials, admin login, learner login, Check profile, logout, refresh, and a narrow mobile window. The private dashboard must match the server role. Later: Day 3 real user management, Day 4 real course management, Day 5 real learner enrollments and full acceptance checks.
+The API checks below used temporary accounts, a temporary course, and a temporary enrollment in local Docker MongoDB. Those records were removed after testing. No real password or token was saved in this repository.
 
-## Checks completed
+- Admin and Learner login returned 200 with the correct server role.
+- Learner registration returned 201; duplicate registration returned 409.
+- Admin course create returned 201; edit, unpublish, and archive returned 200.
+- A course request with invalid data returned 400.
+- A missing token on a protected route returned 401.
+- A Learner request to an Admin course route returned 403.
+- For Day 5, Learner A received one enrollment with the populated course title; Learner B received an empty list. Admin access to `/api/enrollments/me` returned 403.
+- `npm run build` and `npm run lint` passed after Day 5.
 
-- `npm run dev` served the page on port 5173 (HTTP 200).
-- `npm run build` and `npm run lint` passed.
-- CORS preflight from `http://localhost:5173` returned 204 with that origin allowed.
-- Wrong login credentials returned 400; a profile request without a token returned 401.
-- Temporary admin and learner accounts each logged in with HTTP 200 and the correct server role. Their bearer-token profile requests returned 200.
-- A direct learner request to `/api/admin/config` returned 403; the admin request returned 200. Temporary accounts were removed after testing.
+## Manual browser checklist
 
-The visual login and mobile layouts should still be checked manually in your browser with your own demo accounts.
+- [ ] Sign in as Admin; check Home, Users, and Courses.
+- [ ] Sign in as Learner; check that Admin pages are hidden.
+- [ ] Click Load my courses with no enrollments; see the empty message.
+- [ ] With an enrolled Learner, click Load my courses; see real course details.
+- [ ] Try wrong login details; see an error and no private view.
+- [ ] Click Check profile and Log out; refresh after login to see memory-only session behavior.
+- [ ] Use Tab to reach inputs, buttons, and course cards; check the visible focus outline.
+- [ ] View at a narrow mobile width; check that nothing scrolls sideways.
+- [ ] Capture a browser screenshot and a direct 403 response for the school presentation.
+
+Browser automation was unavailable during implementation, so the visual and keyboard checks above are still for a human to complete. The missing user-management routes also prevent the full Day 3 user-list acceptance checks.
